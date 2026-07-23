@@ -33,38 +33,40 @@ export default function IACostos() {
   ];
 
   return (
-    <div className="p-6 space-y-6 bg-darkBg text-gray-100 min-h-screen">
+    <div className="p-6 space-y-6 bg-slate-900 text-gray-100 min-h-screen">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Cpu className="text-neonGreen" /> IA & Proyección de Costos
+          <Cpu className="text-emerald-400" /> IA & Proyección de Costos
         </h1>
         <p className="text-sm text-gray-400">
           Algoritmos entrenados con pliegos tarifarios SIGET · Bloques residenciales vigentes
         </p>
       </div>
 
-      <div className="bg-cardBg p-5 rounded-xl border border-gray-800 space-y-3">
+      {/* Bloques Tarifarios */}
+      <div className="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-3">
         <h2 className="text-sm font-semibold text-gray-300">Bloques tarifarios SIGET — Sector residencial</h2>
         <div className="space-y-2 text-sm">
-          <div className="flex justify-between p-3 bg-gray-900/60 rounded-lg border border-gray-800">
+          <div className="flex justify-between p-3 bg-slate-900/60 rounded-lg border border-slate-700">
             <span>B1: 0 – 99 kWh</span>
             <span className="font-mono text-gray-300">$0.1073 / kWh</span>
           </div>
-          <div className="flex justify-between p-3 bg-gray-900/60 rounded-lg border border-gray-800">
+          <div className="flex justify-between p-3 bg-slate-900/60 rounded-lg border border-slate-700">
             <span>B2: 100 – 200 kWh</span>
             <span className="font-mono text-gray-300">$0.1445 / kWh</span>
           </div>
-          <div className="flex justify-between p-3 bg-emerald-950/40 rounded-lg border border-neonGreen/40">
-            <span className="text-neonGreen font-medium">&gt; 200 kWh</span>
+          <div className="flex justify-between p-3 bg-emerald-950/40 rounded-lg border border-emerald-500/40">
+            <span className="text-emerald-400 font-medium">&gt; 200 kWh</span>
             <div className="flex items-center gap-3">
-              <span className="font-mono text-neonGreen font-bold">$0.1689 / kWh</span>
-              <span className="bg-neonGreen/20 text-neonGreen text-xs px-2 py-0.5 rounded font-bold">BLOQUE ACTIVO</span>
+              <span className="font-mono text-emerald-400 font-bold">$0.1689 / kWh</span>
+              <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-0.5 rounded font-bold">BLOQUE ACTIVO</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-cardBg p-6 rounded-xl border border-gray-800 space-y-6">
+      {/* Simulador */}
+      <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-6">
         <h2 className="text-base font-semibold">Simulador de consumo · Algoritmo IA</h2>
         <div className="space-y-2">
           <input
@@ -73,46 +75,48 @@ export default function IACostos() {
             max="600"
             value={kwh}
             onChange={(e) => setKwh(Number(e.target.value))}
-            className="w-full accent-neonGreen bg-gray-700 h-2 rounded-lg cursor-pointer"
+            className="w-full accent-emerald-500 bg-slate-700 h-2 rounded-lg cursor-pointer"
           />
-          <div className="flex justify-between text-xs text-gray-500 font-mono">
+          <div className="flex justify-between text-xs text-gray-400 font-mono">
             <span>50 kWh</span>
             <span>600 kWh</span>
           </div>
         </div>
 
+        {/* Tarjetas de Resultados */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
-          <div className="bg-gray-900/80 p-4 rounded-lg border border-gray-800">
+          <div className="bg-slate-900/80 p-4 rounded-lg border border-slate-700">
             <span className="text-xs text-gray-400 block">Consumo</span>
             <span className="text-2xl font-bold text-sky-400 font-mono">{kwh} <span className="text-sm">kWh</span></span>
           </div>
-          <div className="bg-gray-900/80 p-4 rounded-lg border border-gray-800">
+          <div className="bg-slate-900/80 p-4 rounded-lg border border-slate-700">
             <span className="text-xs text-gray-400 block">Costo SIGET</span>
-            <span className="text-2xl font-bold text-amber-400 font-mono">${calcularCosto(kwh)} <span className="text-sm">USD</span></span>
+            <span className="text-2xl font-bold text-orange-400 font-mono">${calcularCosto(kwh)} <span className="text-sm">USD</span></span>
           </div>
-          <div className="bg-gray-900/80 p-4 rounded-lg border border-gray-800">
+          <div className="bg-slate-900/80 p-4 rounded-lg border border-slate-700">
             <span className="text-xs text-gray-400 block">CO₂ generado</span>
-            <span className="text-2xl font-bold text-neonGreen font-mono">{co2Generado} <span className="text-sm">kg</span></span>
+            <span className="text-2xl font-bold text-emerald-400 font-mono">{co2Generado} <span className="text-sm">kg</span></span>
           </div>
-          <div className="bg-gray-900/80 p-4 rounded-lg border border-gray-800">
+          <div className="bg-slate-900/80 p-4 rounded-lg border border-slate-700">
             <span className="text-xs text-gray-400 block">Árboles equiv.</span>
-            <span className="text-2xl font-bold text-lime-400 font-mono">{arbolesEquiv} <span className="text-sm">árboles</span></span>
+            <span className="text-2xl font-bold text-teal-400 font-mono">{arbolesEquiv} <span className="text-sm">árboles</span></span>
           </div>
         </div>
       </div>
 
-      <div className="bg-cardBg p-6 rounded-xl border border-gray-800 space-y-4">
+      {/* Gráfica de Proyección */}
+      <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-base font-semibold">Proyección IA — histórico + 5 meses futuros</h2>
-          <span className="bg-indigo-950 text-indigo-400 text-xs px-2.5 py-1 rounded font-mono border border-indigo-800">MODELO PREDICTIVO</span>
+          <span className="bg-cyan-950 text-cyan-400 text-xs px-2.5 py-1 rounded font-mono border border-cyan-800">MODELO PREDICTIVO</span>
         </div>
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={datosProyeccion}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-              <XAxis dataKey="mes" stroke="#6b7280" />
-              <YAxis stroke="#6b7280" />
-              <Tooltip contentStyle={{ backgroundColor: '#111827', borderColor: '#374151' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+              <XAxis dataKey="mes" stroke="#94a3b8" />
+              <YAxis stroke="#94a3b8" />
+              <Tooltip contentStyle={{ backgroundColor: '#1e293b', borderColor: '#475569', borderRadius: '0.5rem' }} />
               <Line type="monotone" dataKey="consumo" stroke="#38bdf8" strokeWidth={3} dot={{ r: 4, fill: '#38bdf8' }} />
             </LineChart>
           </ResponsiveContainer>
