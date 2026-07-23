@@ -8,29 +8,35 @@ export default function App() {
 
   return (
     <div className="bg-slate-900 min-h-screen text-gray-100">
-      {/* Barra superior de prueba local */}
-      <nav className="flex gap-4 p-4 bg-slate-800 border-b border-slate-700">
-        <button 
+      {/* Barra superior de navegación */}
+      <nav className="flex gap-2 p-4 bg-slate-800 border-b border-slate-700 overflow-x-auto">
+        <button
           onClick={() => setVista('costos')}
-          className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${vista === 'costos' ? 'bg-emerald-600 text-white' : 'bg-slate-700 hover:bg-slate-600'}`}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            vista === 'costos' ? 'bg-cyan-600 text-white' : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+          }`}
         >
           IA & Costos
         </button>
-        <button 
+        <button
           onClick={() => setVista('recomendaciones')}
-          className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${vista === 'recomendaciones' ? 'bg-emerald-600 text-white' : 'bg-slate-700 hover:bg-slate-600'}`}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            vista === 'recomendaciones' ? 'bg-cyan-600 text-white' : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+          }`}
         >
           Recomendaciones
         </button>
-        <button 
+        <button
           onClick={() => setVista('ocr')}
-          className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${vista === 'ocr' ? 'bg-emerald-600 text-white' : 'bg-slate-700 hover:bg-slate-600'}`}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            vista === 'ocr' ? 'bg-cyan-600 text-white' : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+          }`}
         >
           OCR Recibos
         </button>
       </nav>
 
-      {/* Renderizado de tu componente actual */}
+      {/* Renderizado dinámico de la vista activa */}
       <main>
         {vista === 'costos' && <IACostos />}
         {vista === 'recomendaciones' && <Recomendaciones />}
