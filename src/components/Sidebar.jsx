@@ -1,13 +1,16 @@
-// src/components/Sidebar.jsx
 import React from 'react';
-import { LayoutDashboard, Activity, Leaf, Cpu, Zap } from 'lucide-react';
+import { LayoutDashboard, Activity, Leaf, Cpu, Zap, Calculator, Lightbulb, FileText } from 'lucide-react';
 import { mockLiveTelemetry } from '../data/mockTelemetry';
 
 export default function Sidebar({ activeTab, setActiveTab }) {
+  // Se agregaron tus 3 opciones conservando la estructura exacta de tu menú
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard Principal', icon: LayoutDashboard },
     { id: 'monitoring', label: 'Monitoreo en Tiempo Real', icon: Activity },
     { id: 'carbon', label: 'Huella Ecológica', icon: Leaf },
+    { id: 'costos', label: 'IA & Costos', icon: Calculator },
+    { id: 'recomendaciones', label: 'Recomendaciones', icon: Lightbulb },
+    { id: 'ocr', label: 'Lectura OCR de Recibo', icon: FileText },
   ];
 
   return (
@@ -38,7 +41,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
           </span>
         </div>
 
-        {/* Menú de Navegación */}
+        {/* Menú de Navegación con tus 6 opciones */}
         <nav className="space-y-1.5">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -65,7 +68,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
       <div className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl">
         <div className="text-[11px] text-slate-400">Factor DGEHM</div>
         <div className="text-sm font-bold text-[#4F98CF] font-mono mt-0.5">
-          ${mockLiveTelemetry.dgehm_factor} <span className="text-[10px] font-normal text-slate-500">/ kWh</span>
+          ${mockLiveTelemetry?.dgehm_factor || '0.38'} <span className="text-[10px] font-normal text-slate-500">/ kWh</span>
         </div>
       </div>
     </aside>
