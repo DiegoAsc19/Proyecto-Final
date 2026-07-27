@@ -47,6 +47,24 @@ export default function App() {
           { time: timeStr, power_w: randomPower, voltage_v: randomVoltage, current_a: randomCurrent },
           ...prev.slice(0, 7),
         ]);
+
+        // --- CONEXIÓN CON MARIADB (ENVÍO AL BACKEND) ---
+        try {
+          await fetch('http://localhost:3001/api/telemetria', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              dispositivo_id: 1,
+              potencia_kw: powerKw,
+              voltaje: randomVoltage,
+              corriente: randomCurrent,
+              frecuencia: 60.0,
+              factor_potencia: 0.96
+            })
+          });
+        } catch (err) {
+          console.error("Error guardando en MariaDB:", err);
+        }
       }
     }, 3000);
 
