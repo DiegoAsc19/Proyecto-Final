@@ -1,44 +1,58 @@
 // src/components/Sidebar.jsx
 import React from 'react';
-import { LayoutDashboard, Activity, Leaf, Cpu, Zap } from 'lucide-react';
-import { mockLiveTelemetry } from '../data/mockTelemetry';
+import { 
+  LayoutGrid, 
+  TrendingUp, 
+  Footprints, 
+  Calculator, 
+  FileText, 
+  Lightbulb, 
+  Cpu 
+} from 'lucide-react';
+
+// Logo oficial VoltAudit IoT: "V" estilizada con corte de rayo
+const VoltLogo = () => (
+  <svg className="w-7 h-7 shrink-0" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Brazo izquierdo de la V en forma de rayo */}
+    <path d="M4 4H11L8 13H13L6 28L18 14H12L15 4H4Z" fill="#3B82F6" />
+    {/* Brazo derecho de la V */}
+    <path d="M16 28L28 4H22.5L13.5 22L16 28Z" fill="#60A5FA" />
+  </svg>
+);
 
 export default function Sidebar({ activeTab, setActiveTab }) {
+  // Mantenemos TODAS las secciones originales del proyecto
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard Principal', icon: LayoutDashboard },
-    { id: 'monitoring', label: 'Monitoreo en Tiempo Real', icon: Activity },
-    { id: 'carbon', label: 'Huella Ecológica', icon: Leaf },
+    { id: 'dashboard', label: 'Dashboard Principal', icon: LayoutGrid },
+    { id: 'monitoring', label: 'Monitoreo', icon: TrendingUp },
+    { id: 'carbon', label: 'Huella Ecológica', icon: Footprints },
+    { id: 'costos', label: 'Simulador IA Costos', icon: Calculator },
+    { id: 'ocr', label: 'Escáner OCR Recibos', icon: FileText },
+    { id: 'recomendaciones', label: 'Recomendaciones', icon: Lightbulb },
   ];
 
   return (
-    <aside className="w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between p-5">
+    <aside className="w-64 bg-[#181B20] border-r border-[#22262C] flex flex-col justify-between p-5 select-none shrink-0">
       <div>
-        {/* Logo corporativo */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="p-2 rounded-xl bg-[#4FCFC6]/10 border border-[#4FCFC6]/20">
-            <Zap className="w-6 h-6 text-[#4FCFC6]" />
-          </div>
-          <div>
-            <h1 className="font-bold text-lg text-slate-100 leading-none">
-              VoltAudit <span className="text-[#4FCFC6]">IoT</span>
-            </h1>
-            <span className="text-[10px] text-slate-500 font-mono">v2.4.1</span>
-          </div>
+        {/* Logo Oficial VoltAudit IoT */}
+        <div className="flex items-center gap-2.5 mb-8 px-1">
+          <VoltLogo />
+          <h2 className="font-semibold text-slate-200 text-lg tracking-tight">VoltAudit IoT</h2>
         </div>
 
-        {/* Estado del dispositivo ESP32 */}
-        <div className="mb-6 p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-mono text-slate-300">
+        {/* Badge de Estado del Dispositivo */}
+        <div className="mb-6 p-2.5 bg-[#22262B] border border-[#2D323A] rounded-2xl flex items-center justify-between text-xs font-medium">
+          <div className="flex items-center gap-2 text-slate-300">
             <Cpu className="w-4 h-4 text-slate-400" />
             <span>ESP32-S3</span>
           </div>
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#4FCF86] bg-[#4FCF86]/10 px-2 py-0.5 rounded-md border border-[#4FCF86]/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#4FCF86]"></span>
-            ONLINE
-          </span>
+          <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>ONLINE</span>
+          </div>
         </div>
 
-        {/* Menú de Navegación */}
+        {/* Navegación con TODAS las opciones estilizadas */}
         <nav className="space-y-1.5">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -47,25 +61,26 @@ export default function Sidebar({ activeTab, setActiveTab }) {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-[#4FCFC6]/15 text-[#4FCFC6] border border-[#4FCFC6]/30'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+                    ? 'bg-[#1D333D] text-[#52C5E0] shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-[#22262B]/50'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-[#4FCFC6]' : 'text-slate-400'}`} />
-                {item.label}
+                <Icon className={`w-4 h-4 ${isActive ? 'text-[#52C5E0]' : 'text-slate-400'}`} />
+                <span>{item.label}</span>
               </button>
             );
           })}
         </nav>
       </div>
 
-      {/* Pie del Sidebar - Factor DGEHM */}
-      <div className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl">
-        <div className="text-[11px] text-slate-400">Factor DGEHM</div>
-        <div className="text-sm font-bold text-[#4F98CF] font-mono mt-0.5">
-          ${mockLiveTelemetry.dgehm_factor} <span className="text-[10px] font-normal text-slate-500">/ kWh</span>
+      {/* Tarjeta DGEHM Inferior */}
+      <div className="p-4 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-3 mt-4">
+        <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider">DGEHM</h4>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-slate-400">Factor DGEHM</span>
+          <span className="font-mono font-bold text-[#4B92E5] text-sm">$0.38</span>
         </div>
       </div>
     </aside>

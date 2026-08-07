@@ -1,114 +1,165 @@
-// src/components/CarbonView.jsx
-import React, { useState } from 'react';
-import { Leaf, Calculator, Cloud } from 'lucide-react';
-import KPICards from './KPICards';
+// src/pages/DashboardView.jsx
+import React from 'react';
+import { 
+  Zap, 
+  DollarSign, 
+  Activity, 
+  Cpu, 
+  TrendingUp, 
+  Wifi, 
+  CheckCircle2, 
+  ArrowUpRight 
+} from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
-export default function CarbonView({ telemetry = {} }) {
-  const initialTariff = telemetry?.dgehm_factor || 0.38;
-  const [customTariff, setCustomTariff] = useState(initialTariff);
-  const [customDgehm, setCustomDgehm] = useState(0.38);
-  const [dailyHours, setDailyHours] = useState(8);
+const weeklyData = [
+  { day: 'Lun', kwh: 4.8 },
+  { day: 'Mar', kwh: 5.2 },
+  { day: 'Mié', kwh: 6.1 },
+  { day: 'Jue', kwh: 5.9 },
+  { day: 'Vie', kwh: 7.3 },
+  { day: 'Sáb', kwh: 8.0 },
+  { day: 'Dom', kwh: 6.5 },
+];
 
-  const powerW = telemetry?.power_w || 0;
-  const currentKw = powerW / 1000;
-  const dailyKwh = currentKw * dailyHours;
-  const monthlyKwh = dailyKwh * 30;
-  
-  const monthlyCost = (monthlyKwh * customTariff).toFixed(2);
-  const monthlyCo2 = (monthlyKwh * customDgehm).toFixed(2);
-
+export default function DashboardView() {
   return (
-    <div className="space-y-6">
-      {/* Banner Principal */}
-      <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl flex flex-wrap items-center justify-between gap-6">
-        <div>
-          <h2 className="text-base font-bold text-slate-200 flex items-center gap-2">
-            <Leaf className="w-5 h-5 text-[#4FCF86]" /> Cálculo de Huella de Carbono
-          </h2>
-          <div className="text-4xl font-black text-[#4FCF86] font-mono my-2">
-            {monthlyCo2} <span className="text-2xl font-semibold text-slate-300">kg CO₂ / mes</span>
+    <div className="space-y-6 text-slate-100 font-sans">
+      {/* Encabezado */}
+      <div>
+        <h1 className="text-2xl font-bold text-slate-100 tracking-tight">Dashboard Principal</h1>
+        <p className="text-xs text-slate-400 mt-1">
+          Resumen acumulado del mes, estado del nodo IoT y comportamiento semanal.
+        </p>
+      </div>
+
+      {/* KPI Cards Ejecutivos */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Consumo Mensual */}
+        <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-400">Consumo del Mes</span>
+            <div className="text-2xl font-bold text-white font-mono">148.5 <span className="text-sm font-sans text-slate-400">kWh</span></div>
+            <span className="text-[11px] text-[#34C759] flex items-center gap-0.5">
+              <TrendingUp className="w-3 h-3" /> -4.2% vs mes anterior
+            </span>
           </div>
-          <p className="text-xs text-slate-400 max-w-md">
-            Estimación de emisiones mensuales proyectada con la potencia actual ({powerW} W) operando {dailyHours}h diarias.
-          </p>
+          <div className="p-3 bg-[#1E2B3C] text-[#4A8CE8] rounded-xl">
+            <Zap className="w-5 h-5" />
+          </div>
         </div>
 
-        <div className="p-4 bg-[#4FCF86]/10 rounded-2xl border border-[#4FCF86]/20 flex items-center justify-center">
-          <Cloud className="w-12 h-12 text-[#4FCF86]" />
+        {/* Costo Acumulado */}
+        <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-400">Gasto Estimado</span>
+            <div className="text-2xl font-bold text-white font-mono">$56.43 <span className="text-xs text-slate-400 font-sans">USD</span></div>
+            <span className="text-[11px] text-slate-400">Tarifa DGEHM: $0.38/kWh</span>
+          </div>
+          <div className="p-3 bg-[#1E382B] text-[#34C759] rounded-xl">
+            <DollarSign className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Carga Activa */}
+        <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-400">Potencia Actual</span>
+            <div className="text-2xl font-bold text-white font-mono">948.7 <span className="text-sm font-sans text-slate-400">W</span></div>
+            <span className="text-[11px] text-[#E5A93C]">Carga Media-Alta</span>
+          </div>
+          <div className="p-3 bg-[#3D321D] text-[#E5A93C] rounded-xl">
+            <Activity className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Estado Dispositivo */}
+        <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-400">Nodo Principal</span>
+            <div className="text-base font-bold text-white flex items-center gap-2">
+              ESP32-S3
+              <span className="text-[10px] bg-[#1E382B] text-[#34C759] font-mono px-2 py-0.5 rounded-full">ONLINE</span>
+            </div>
+            <span className="text-[11px] text-slate-400 flex items-center gap-1">
+              <Wifi className="w-3 h-3 text-[#34C759]" /> RSSI: -62 dBm
+            </span>
+          </div>
+          <div className="p-3 bg-[#1D333D] text-[#52C5E0] rounded-xl">
+            <Cpu className="w-5 h-5" />
+          </div>
         </div>
       </div>
 
-      {/* Calculadora */}
-      <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl">
-        <div className="flex items-center gap-2 mb-4">
-          <Calculator className="w-5 h-5 text-[#4F98CF]" />
-          <h3 className="text-sm font-bold text-slate-200">
-            Calculadora Interactiva de Tarifas e Impacto
-          </h3>
+      {/* Gráfico Semanal + Panel Hardware */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Gráfico de Barras por Día */}
+        <div className="lg:col-span-2 p-6 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-semibold text-slate-100">Consumo Diario de la Semana (kWh)</h3>
+              <p className="text-xs text-slate-400">Total acumulado por jornada</p>
+            </div>
+            <span className="text-xs text-slate-400 font-mono">Meta: 8.0 kWh/día</span>
+          </div>
+
+          <div className="h-64 w-full pt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={weeklyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2D323A" vertical={false} />
+                <XAxis dataKey="day" stroke="#64748B" fontSize={11} tickLine={false} />
+                <YAxis stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
+                <Tooltip
+                  cursor={{ fill: '#181B20' }}
+                  contentStyle={{
+                    backgroundColor: '#181B20',
+                    borderColor: '#2D323A',
+                    borderRadius: '12px',
+                    color: '#F8FAFC',
+                    fontSize: '12px'
+                  }}
+                />
+                <Bar dataKey="kwh" fill="#4A8CE8" radius={[6, 6, 0, 0]} barSize={28} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        {/* Resumen del Dispositivo Hardware */}
+        <div className="p-6 bg-[#22262B] border border-[#2D323A] rounded-2xl flex flex-col justify-between space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-2">
-              Tarifa Eléctrica ($ / kWh)
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-2.5 text-slate-500 text-xs">$</span>
-              <input
-                type="number"
-                step="0.01"
-                value={customTariff}
-                onChange={(e) => setCustomTariff(parseFloat(e.target.value) || 0)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-7 pr-3 py-2 text-sm text-slate-100 font-mono focus:outline-none focus:border-[#4F98CF]"
-              />
+            <h3 className="text-base font-semibold text-slate-100 mb-1">Detalles del Hardware</h3>
+            <p className="text-xs text-slate-400 mb-4">Parámetros operativos del microcontrolador</p>
+
+            <div className="space-y-3 text-xs">
+              <div className="flex justify-between py-2 border-b border-[#2D323A]">
+                <span className="text-slate-400">Sensor SCT-013:</span>
+                <span className="font-mono text-slate-200">100A / 50mA</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-[#2D323A]">
+                <span className="text-slate-400">Módulo AC Voltaje:</span>
+                <span className="font-mono text-slate-200">ZMPT101B</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-[#2D323A]">
+                <span className="text-slate-400">Tiempo de Actividad:</span>
+                <span className="font-mono text-slate-200">14 días, 6 hrs</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-[#2D323A]">
+                <span className="text-slate-400">Frecuencia Muestreo:</span>
+                <span className="font-mono text-slate-200">1000 Hz</span>
+              </div>
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-2">
-              Factor DGEHM (kg CO₂ / kWh)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              value={customDgehm}
-              onChange={(e) => setCustomDgehm(parseFloat(e.target.value) || 0)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 font-mono focus:outline-none focus:border-[#4FCF86]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-2">
-              Uso Estimado (Horas / Día)
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="24"
-              value={dailyHours}
-              onChange={(e) => setDailyHours(parseInt(e.target.value) || 1)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 font-mono focus:outline-none focus:border-amber-400"
-            />
-          </div>
-        </div>
-
-        <div className="p-4 bg-slate-950 border border-slate-800/80 rounded-xl grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-          <div>
-            <span className="text-[11px] text-slate-500 block">Consumo Mensual Proyectado</span>
-            <span className="text-lg font-bold font-mono text-cyan-400">{monthlyKwh.toFixed(1)} kWh</span>
-          </div>
-          <div>
-            <span className="text-[11px] text-slate-500 block">Costo Proyectado Mensual</span>
-            <span className="text-lg font-bold font-mono text-[#4FCF86]">${monthlyCost}</span>
-          </div>
-          <div>
-            <span className="text-[11px] text-slate-500 block">Emisión Mensual CO₂</span>
-            <span className="text-lg font-bold font-mono text-rose-400">{monthlyCo2} kg</span>
+          <div className="p-3 bg-[#181B20] border border-[#2D323A] rounded-xl flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-[#34C759] shrink-0" />
+            <div className="text-xs">
+              <span className="font-semibold text-slate-200">Calibración Correcta</span>
+              <p className="text-slate-400 text-[11px]">Cero absoluto y offset estables.</p>
+            </div>
           </div>
         </div>
       </div>
-
-      <KPICards data={telemetry} />
     </div>
   );
 }

@@ -2,67 +2,64 @@
 import React from 'react';
 import { Zap, Gauge, Flame, DollarSign } from 'lucide-react';
 
-export default function KPICards({ data }) {
-  const cards = [
+export default function KPICards({ telemetry = {} }) {
+  const powerW = telemetry?.power_w ?? 945.8;
+  const voltageV = telemetry?.voltage_v ?? 120.4;
+  const currentA = telemetry?.current_a ?? 7.85;
+  const projectedCost = 18.25;
+
+  const cardData = [
     {
       id: 'power',
-      title: 'Potencia Actual',
-      value: `${data.power_w} W`,
-      subtext: 'Lectura instantánea',
+      label: 'Potencia Actual',
+      value: `${powerW.toFixed(1)} W`,
       icon: Zap,
-      colorClass: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+      iconBg: 'bg-[#3D321D]',
+      iconColor: 'text-[#E5A93C]',
     },
     {
       id: 'voltage',
-      title: 'Voltaje RMS',
-      value: `${data.voltage_v} V`,
-      subtext: 'Tensión de red',
+      label: 'Voltaje RMS',
+      value: `${voltageV.toFixed(1)} V`,
       icon: Gauge,
-      colorClass: 'text-[#4F98CF] bg-[#4F98CF]/10 border-[#4F98CF]/20',
+      iconBg: 'bg-[#1E2B3C]',
+      iconColor: 'text-[#4A8CE8]',
     },
     {
       id: 'current',
-      title: 'Corriente',
-      value: `${data.current_a} A`,
-      subtext: 'Flujo de carga',
+      label: 'Corriente',
+      value: `${currentA.toFixed(2)} A`,
       icon: Flame,
-      colorClass: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+      iconBg: 'bg-[#3C2024]',
+      iconColor: 'text-[#E85555]',
     },
     {
       id: 'cost',
-      title: 'Costo Proyectado',
-      value: `$${data.projected_cost_usd}`,
-      subtext: 'Estimado mensual',
+      label: 'Costo Proyectado',
+      value: `$${projectedCost.toFixed(2)}`,
       icon: DollarSign,
-      colorClass: 'text-[#4FCF86] bg-[#4FCF86]/10 border-[#4FCF86]/20',
+      iconBg: 'bg-[#1E382B]',
+      iconColor: 'text-[#34C759]',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      {cards.map((card) => {
-        const IconComponent = card.icon;
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {cardData.map((card) => {
+        const Icon = card.icon;
         return (
           <div
             key={card.id}
-            className="p-5 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col justify-between transition-colors hover:border-slate-700"
+            className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-3"
           >
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-                {card.title}
-              </span>
-              <div className={`p-2.5 rounded-xl border ${card.colorClass}`}>
-                <IconComponent className="w-5 h-5" />
-              </div>
+            <div className={`w-10 h-10 ${card.iconBg} rounded-xl flex items-center justify-center`}>
+              <Icon className={`w-5 h-5 ${card.iconColor}`} />
             </div>
-
             <div>
-              <div className="text-2xl font-bold font-mono text-slate-100">
+              <span className="text-xs text-slate-400 block font-normal mb-1">{card.label}</span>
+              <span className="text-2xl font-bold text-white font-sans tracking-tight block">
                 {card.value}
-              </div>
-              <div className="text-xs text-slate-500 mt-1">
-                {card.subtext}
-              </div>
+              </span>
             </div>
           </div>
         );

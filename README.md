@@ -1,16 +1,40 @@
-# React + Vite
+# VoltAudit IoT - Dashboard de Telemetría y Auditoría Energética
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema de monitoreo energético en tiempo real desarrollado para dispositivos ESP32-S3. Permite visualizar consumo de potencia, estimación de costos, impacto de huella de carbono y planes de recomendaciones de ahorro.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🛠️ Tecnologías y Bibliotecas Instaladas (Evidencia de Desarrollo)
 
-## React Compiler
+Para la creación y maquetación de la aplicación web se instalaron y utilizaron las siguientes dependencias principales:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. Núcleo y Arquitectura (Core)
+* **`react`** (`^18.x`): Biblioteca principal basada en componentes para la creación de la interfaz de usuario.
+* **`react-dom`** (`^18.x`): Renderizado dinámico del árbol de componentes en el DOM del navegador.
 
-## Expanding the ESLint configuration
+### 2. Estilos y Diseño Visual
+* **`tailwindcss`** (`^3.x`): Framework de CSS utilitario utilizado para todo el maquetado responsive, tema oscuro (Dark Mode) y diseño de la interfaz.
+* **`postcss` / `autoprefixer`**: Procesadores CSS para asegurar la compatibilidad de estilos entre diferentes navegadores.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 3. Iconografía y Componentes Gráficos
+* **`lucide-react`**: Colección de iconos en formato SVG (`Zap`, `Leaf`, `Lightbulb`, `Wifi`, `Calculator`, etc.) utilizados en los botones, métricas y badges de estado.
+* **`recharts`**: Biblioteca de visualización de datos utilizada para generar los gráficos de telemetría y consumo energético en tiempo real.
+
+### 4. Entorno de Desarrollo y Compilación
+* **`vite`**: Herramienta de compilación rápida y servidor de desarrollo local para React.
+
+---
+
+## 🚀 Instrucciones de Ejecución Local
+
+1. **Instalar dependencias:**
+   ```bash
+   npm install
+   ```
+
+2. **Iniciar el servidor de desarrollo:**
+   ```bash
+   npm run dev
+   ```
+
+3. Abrir en el navegador la dirección generada en la consola (por defecto `http://localhost:5173`).
