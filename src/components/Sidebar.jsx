@@ -1,6 +1,5 @@
 // src/components/Sidebar.jsx
 import React from 'react';
-import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Activity, 
@@ -10,18 +9,18 @@ import {
   Zap 
 } from 'lucide-react';
 
-export default function Sidebar() {
+export default function Sidebar({ activeTab, setActiveTab }) {
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-    { name: 'Monitoreo', path: '/monitoreo', icon: Activity },
-    { name: 'OCR Recibos', path: '/ocr-recibos', icon: Receipt },
-    { name: 'IA Costos', path: '/ia-costos', icon: Bot },
-    { name: 'Recomendaciones', path: '/recomendaciones', icon: Lightbulb },
+    { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard },
+    { id: 'monitoring', name: 'Monitoreo', icon: Activity },
+    { id: 'ocr', name: 'OCR Recibos', icon: Receipt },
+    { id: 'costos', name: 'IA Costos', icon: Bot },
+    { id: 'recomendaciones', name: 'Recomendaciones', icon: Lightbulb },
   ];
 
   return (
     <aside className="w-64 bg-[#181B20] border-r border-[#2D323A] flex flex-col justify-between min-h-screen p-4 select-none shrink-0">
-      {/* Encabezado del Sidebar / Logo */}
+      {/* Logo */}
       <div>
         <div className="flex items-center gap-3 px-3 py-4 mb-6 border-b border-[#2D323A]">
           <div className="p-2 bg-[#1E2B3C] text-[#4A8CE8] rounded-xl">
@@ -33,31 +32,30 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* Menú de Navegación */}
+        {/* Menú de Navegación por Estado */}
         <nav className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
+            const isActive = activeTab === item.id;
             return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-[#22262B] text-white border border-[#2D323A]'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-[#22262B]/50'
-                  }`
-                }
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'bg-[#22262B] text-white border border-[#2D323A]'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-[#22262B]/50'
+                }`}
               >
                 <Icon className="w-4 h-4 text-[#4A8CE8]" />
                 <span>{item.name}</span>
-              </NavLink>
+              </button>
             );
           })}
         </nav>
       </div>
 
-      {/* Pie del Sidebar - Estado */}
+      {/* Footer del Sidebar */}
       <div className="pt-4 border-t border-[#2D323A]">
         <div className="px-3 py-2.5 bg-[#22262B] border border-[#2D323A] rounded-xl flex items-center justify-between">
           <div className="flex items-center gap-2">
