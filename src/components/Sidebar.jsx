@@ -5,35 +5,43 @@ import {
   Activity, 
   Receipt, 
   Bot, 
-  Lightbulb, 
-  Zap 
+  Lightbulb,
+  Footprints
 } from 'lucide-react';
 
 export default function Sidebar({ activeTab, setActiveTab }) {
   const navItems = [
-    { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard },
+    { id: 'dashboard', name: 'Dashboard Principal', icon: LayoutDashboard },
     { id: 'monitoring', name: 'Monitoreo', icon: Activity },
+    { id: 'carbon', name: 'Huella de Carbono', icon: Footprints },
     { id: 'ocr', name: 'OCR Recibos', icon: Receipt },
     { id: 'costos', name: 'IA Costos', icon: Bot },
     { id: 'recomendaciones', name: 'Recomendaciones', icon: Lightbulb },
   ];
 
   return (
-    <aside className="w-64 bg-[#181B20] border-r border-[#2D323A] flex flex-col justify-between min-h-screen p-4 select-none shrink-0">
-      {/* Logo */}
+    <aside className="w-64 bg-[#111418] border-r border-[#1C2128] flex flex-col justify-between min-h-screen p-4 select-none shrink-0 font-sans">
       <div>
-        <div className="flex items-center gap-3 px-3 py-4 mb-6 border-b border-[#2D323A]">
-          <div className="p-2 bg-[#1E2B3C] text-[#4A8CE8] rounded-xl">
-            <Zap className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-slate-100 tracking-tight leading-none">VoltAudit</h1>
-            <span className="text-[10px] text-slate-400 font-mono">IoT Energy Monitor</span>
+        {/* Logo VoltAudit IoT */}
+        <div className="flex items-center gap-3 px-2 py-3 mb-6 border-b border-[#1C2128]">
+          <svg 
+            viewBox="0 0 100 100" 
+            className="w-8 h-8 flex-shrink-0" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <polygon points="12,18 28,18 46,82 30,82" fill="#3B82F6" />
+            <polygon points="68,18 44,52 56,52 46,82 78,44 60,44" fill="#38BDF8" />
+          </svg>
+
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-xl font-bold tracking-tight text-white">VoltAudit</span>
+            <span className="text-xl font-medium text-gray-300">IoT</span>
           </div>
         </div>
 
-        {/* Menú de Navegación por Estado */}
-        <nav className="space-y-1">
+        {/* Menú de Navegación */}
+        <nav className="space-y-1.5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -41,13 +49,13 @@ export default function Sidebar({ activeTab, setActiveTab }) {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-[#22262B] text-white border border-[#2D323A]'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-[#22262B]/50'
+                    ? 'bg-[#1C2A29] text-[#34D399] border border-[#27493E]'
+                    : 'text-gray-400 hover:text-gray-200 hover:bg-[#161A20]'
                 }`}
               >
-                <Icon className="w-4 h-4 text-[#4A8CE8]" />
+                <Icon className={`w-4 h-4 ${isActive ? 'text-[#34D399]' : 'text-gray-400'}`} />
                 <span>{item.name}</span>
               </button>
             );
@@ -55,17 +63,12 @@ export default function Sidebar({ activeTab, setActiveTab }) {
         </nav>
       </div>
 
-      {/* Footer del Sidebar */}
-      <div className="pt-4 border-t border-[#2D323A]">
-        <div className="px-3 py-2.5 bg-[#22262B] border border-[#2D323A] rounded-xl flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#34C759] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#34C759]"></span>
-            </span>
-            <span className="text-xs text-slate-300 font-mono">ESP32 Online</span>
-          </div>
-          <span className="text-[10px] text-slate-500 font-mono">v1.0</span>
+      {/* Tarjeta DGEHM (Inferior) */}
+      <div className="bg-[#171B21] border border-[#2D333B] rounded-2xl p-4 mt-auto">
+        <h4 className="text-xs font-bold text-gray-200 uppercase tracking-wider mb-2">DGEHM</h4>
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-gray-400">Factor DGEHM</span>
+          <span className="text-sm font-bold text-[#38BDF8]">$0.38</span>
         </div>
       </div>
     </aside>
