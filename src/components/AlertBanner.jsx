@@ -1,31 +1,23 @@
 // src/components/AlertBanner.jsx
 import React from 'react';
-import { AlertTriangle, ShieldCheck } from 'lucide-react';
+import { ShieldCheck, Settings } from 'lucide-react';
 
-export default function AlertBanner({ powerW, threshold = 950 }) {
-  const isOverloaded = powerW > threshold;
-
-  if (!isOverloaded) {
-    return (
-      <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between text-xs text-slate-400 mb-6">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-[#4FCF86]" />
-          <span>Consumo dentro del rango nominal de operación.</span>
-        </div>
-        <span className="font-mono text-slate-500">Límite seguro: {threshold} W</span>
-      </div>
-    );
-  }
-
+export default function AlertBanner() {
   return (
-    <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-center justify-between text-xs text-rose-300 mb-6 animate-pulse">
-      <div className="flex items-center gap-2 font-medium">
-        <AlertTriangle className="w-5 h-5 text-rose-400" />
-        <span>¡ADVERTENCIA DE SOBRECARGA! La lectura actual ({powerW} W) supera el límite configurado ({threshold} W).</span>
+    <div className="flex items-center justify-between bg-[#151921] border border-[#262C36] rounded-2xl p-4 shadow-md">
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+          <ShieldCheck className="w-4 h-4" />
+        </div>
+        <span className="text-xs font-semibold text-gray-200">
+          Consumo dentro del rango nominal de operación.
+        </span>
       </div>
-      <span className="font-mono text-rose-400 font-bold bg-rose-500/20 px-2.5 py-1 rounded-lg border border-rose-500/30">
-        ALERTA ACTIVA
-      </span>
+
+      <button className="flex items-center gap-2 bg-[#1C222D] hover:bg-[#252D3C] text-gray-300 hover:text-white text-xs font-semibold px-3.5 py-2 rounded-xl border border-[#262C36] transition-all">
+        <Settings className="w-3.5 h-3.5 text-gray-400" />
+        <span>Ajustes</span>
+      </button>
     </div>
   );
 }

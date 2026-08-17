@@ -2,64 +2,67 @@
 import React from 'react';
 import { Zap, Gauge, Flame, DollarSign } from 'lucide-react';
 
-export default function KPICards({ telemetry = {} }) {
-  const powerW = telemetry?.power_w ?? 945.8;
-  const voltageV = telemetry?.voltage_v ?? 120.4;
-  const currentA = telemetry?.current_a ?? 7.85;
-  const projectedCost = 18.25;
+export default function KPICards({ data }) {
+  // Mantenemos exactamente tus props/variables de datos
+  const potencia = data?.watts ?? '951.9 W';
+  const voltaje = data?.volts ?? '120.1 V';
+  const corriente = data?.amps ?? '7.93 A';
+  const costo = data?.costo ?? '$18.25';
 
-  const cardData = [
+  const kpis = [
     {
-      id: 'power',
-      label: 'Potencia Actual',
-      value: `${powerW.toFixed(1)} W`,
+      title: 'Potencia Actual',
+      value: potencia,
       icon: Zap,
-      iconBg: 'bg-[#3D321D]',
-      iconColor: 'text-[#E5A93C]',
+      accent: 'text-amber-400',
+      bgIcon: 'bg-amber-500/10 border-amber-500/20',
+      glow: 'group-hover:border-amber-500/40',
     },
     {
-      id: 'voltage',
-      label: 'Voltaje RMS',
-      value: `${voltageV.toFixed(1)} V`,
+      title: 'Voltaje RMS',
+      value: voltaje,
       icon: Gauge,
-      iconBg: 'bg-[#1E2B3C]',
-      iconColor: 'text-[#4A8CE8]',
+      accent: 'text-sky-400',
+      bgIcon: 'bg-sky-500/10 border-sky-500/20',
+      glow: 'group-hover:border-sky-500/40',
     },
     {
-      id: 'current',
-      label: 'Corriente',
-      value: `${currentA.toFixed(2)} A`,
+      title: 'Corriente',
+      value: corriente,
       icon: Flame,
-      iconBg: 'bg-[#3C2024]',
-      iconColor: 'text-[#E85555]',
+      accent: 'text-rose-400',
+      bgIcon: 'bg-rose-500/10 border-rose-500/20',
+      glow: 'group-hover:border-rose-500/40',
     },
     {
-      id: 'cost',
-      label: 'Costo Proyectado',
-      value: `$${projectedCost.toFixed(2)}`,
+      title: 'Costo Proyectado',
+      value: costo,
       icon: DollarSign,
-      iconBg: 'bg-[#1E382B]',
-      iconColor: 'text-[#34C759]',
+      accent: 'text-emerald-400',
+      bgIcon: 'bg-emerald-500/10 border-emerald-500/20',
+      glow: 'group-hover:border-emerald-500/40',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {cardData.map((card) => {
-        const Icon = card.icon;
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {kpis.map((kpi, index) => {
+        const Icon = kpi.icon;
         return (
           <div
-            key={card.id}
-            className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-3"
+            key={index}
+            className={`group bg-[#151921] border border-[#262C36] ${kpi.glow} rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-xl`}
           >
-            <div className={`w-10 h-10 ${card.iconBg} rounded-xl flex items-center justify-center`}>
-              <Icon className={`w-5 h-5 ${card.iconColor}`} />
-            </div>
-            <div>
-              <span className="text-xs text-slate-400 block font-normal mb-1">{card.label}</span>
-              <span className="text-2xl font-bold text-white font-sans tracking-tight block">
-                {card.value}
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                {kpi.title}
               </span>
+              <div className={`p-2.5 rounded-xl border ${kpi.bgIcon} transition-transform group-hover:scale-110`}>
+                <Icon className={`w-4 h-4 ${kpi.accent}`} />
+              </div>
+            </div>
+            <div className="text-2xl font-black text-white tracking-tight">
+              {kpi.value}
             </div>
           </div>
         );
