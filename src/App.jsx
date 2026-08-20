@@ -1,6 +1,5 @@
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
-import { Settings } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import CarbonView from './components/CarbonView';
 import MonitoringView from './components/MonitoringView';
@@ -119,21 +118,14 @@ export default function App() {
 
       {/* Ámbito de Contenido Principal */}
       <main className="flex-1 p-8 overflow-y-auto relative">
-        {/* Botón flotante de Ajustes */}
-        <div className="absolute top-8 right-8 z-20">
-          <button
-            onClick={() => setIsSettingsOpen(true)}
-            className="flex items-center gap-2 text-xs font-semibold bg-[#22262B] border border-[#2D323A] hover:border-slate-600 px-3.5 py-2 rounded-xl text-slate-300 transition-all shadow-sm"
-          >
-            <Settings className="w-4 h-4 text-[#52C5E0]" />
-            <span>Ajustes</span>
-          </button>
-        </div>
-
-        {/* Banner de alerta */}
+        {/* Banner de alerta con botón de Ajustes integrado en una sola tarjeta */}
         {(activeTab === 'dashboard' || activeTab === 'monitoring') && (
           <div className="mb-6">
-            <AlertBanner powerW={telemetry?.power_w || 0} threshold={powerThreshold} />
+            <AlertBanner
+              powerW={telemetry?.power_w || 0}
+              threshold={powerThreshold}
+              onOpenSettings={() => setIsSettingsOpen(true)}
+            />
           </div>
         )}
 

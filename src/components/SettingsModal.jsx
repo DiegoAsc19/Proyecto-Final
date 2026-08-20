@@ -10,7 +10,7 @@ export default function SettingsModal({
   ipAddress,
   setIpAddress,
   isSimulation,
-  setIsSimulation,
+  setIsSimulation
 }) {
   if (!isOpen) return null;
 

@@ -2,9 +2,10 @@
 import React from 'react';
 import { ShieldCheck, Settings } from 'lucide-react';
 
-export default function AlertBanner() {
+export default function AlertBanner({ powerW, threshold, onOpenSettings }) {
   return (
-    <div className="flex items-center justify-between bg-[#151921] border border-[#262C36] rounded-2xl p-4 shadow-md">
+    <div className="flex items-center justify-between bg-[#151921] border border-[#262C36] rounded-2xl p-4 shadow-md w-full">
+      {/* Lado izquierdo: Alerta */}
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
           <ShieldCheck className="w-4 h-4" />
@@ -14,7 +15,11 @@ export default function AlertBanner() {
         </span>
       </div>
 
-      <button className="flex items-center gap-2 bg-[#1C222D] hover:bg-[#252D3C] text-gray-300 hover:text-white text-xs font-semibold px-3.5 py-2 rounded-xl border border-[#262C36] transition-all">
+      {/* Lado derecho: Botón Ajustes integrado en la misma tarjeta */}
+      <button
+        onClick={onOpenSettings}
+        className="flex items-center gap-2 bg-[#1C222D] hover:bg-[#252D3C] text-gray-300 hover:text-white text-xs font-semibold px-3.5 py-2 rounded-xl border border-[#262C36] transition-all"
+      >
         <Settings className="w-3.5 h-3.5 text-gray-400" />
         <span>Ajustes</span>
       </button>
