@@ -1,235 +1,225 @@
-  // src/components/CarbonView.jsx
-  import React from 'react';
-  import { Leaf, Zap, TreePine, Car, ShieldCheck, TrendingDown, Target, Lightbulb, Clock } from 'lucide-react';
+// src/components/CarbonView.jsx
+import React, { useState, useEffect } from 'react';
+import { Leaf, Car, Trees, Zap } from 'lucide-react';
 
-  export default function CarbonView({ telemetry }) {
-    // Potencia actual desde la telemetría
-    const currentPowerW = telemetry?.power_w || 948.7;
-    
-    // Cálculos dinámicos
-    const monthlyKwh = +(148.5 + (currentPowerW - 940) * 0.05).toFixed(1);
-    const CO2_FACTOR = 0.385; // Factor DGEHM El Salvador
-    
-    const co2EmittedKg = +(monthlyKwh * CO2_FACTOR).toFixed(1);
-    const treesNeeded = Math.ceil(co2EmittedKg / 1.64);
-    const carKmEquivalent = Math.round(co2EmittedKg * 4.1);
+export default function CarbonView({ telemetry = {} }) {
+  const [consumoDiario, setConsumoDiario] = useState([]);
+  
+  // Factor DGEHM El Salvador: 0.1944 kg CO2 por kWh
+  const FACTOR_CO2 = 0.1944;
 
-    // Datos simulados del histórico semanal de CO2 (kg/día)
-    const weeklyData = [
-      { day: 'Lun', co2: 1.8, target: 2.0 },
-      { day: 'Mar', co2: 2.1, target: 2.0 },
-      { day: 'Mié', co2: 2.4, target: 2.0 },
-      { day: 'Jue', co2: 2.3, target: 2.0 },
-      { day: 'Vie', co2: 2.9, target: 2.0 },
-      { day: 'Sáb', co2: 3.2, target: 2.0 },
-      { day: 'Dom', co2: 2.6, target: 2.0 },
-    ];
+  useEffect(() => {
+    const obtenerConsumo = async () => {
+      try {
+        const res = await fetch('http://localhost:3001/api/consumo/diario');
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setConsumoDiario(data);
+        }
+      } catch (error) {
+        console.error("Error al obtener consumo diario:", error);
+      }
+    };
+    obtenerConsumo();
+  }, []);
 
-    const maxCo2 = Math.max(...weeklyData.map(d => d.co2));
+  // Días por defecto para la gráfica si aún no hay lecturas suficientes en BD
+  const diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  
+  // Potencia actual en kW (reacciona a 0 si la simulación se apaga o backend no responde)
+  const potenciaKwActual = parseFloat(telemetry?.potencia_kw || 0) || (parseFloat(telemetry?.power_w || 0) / 1000);
 
-    return (
-      <div className="space-y-6 animate-fade-in">
-        {/* Encabezado */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2.5">
-              <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
-                <Leaf className="w-6 h-6" />
-              </div>
-              Huella de Carbono e Impacto Ambiental
-            </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              Cálculo de emisiones de CO₂ a partir del consumo energético en tiempo real.
-            </p>
+  // Acumulados reales o calculados dinámicamente con la telemetría actual
+  const totalKwh = consumoDiario.length > 0 
+    ? consumoDiario.reduce((acc, item) => acc + parseFloat(item.kwh || 0), 0)
+    : parseFloat((potenciaKwActual * 24).toFixed(2)); // Estimado día basado en el estado actual
+
+  const totalCo2 = (totalKwh * FACTOR_CO2).toFixed(2);
+  const arbolesEquiv = totalCo2 > 0 ? Math.max(1, Math.round(totalCo2 / 1.63)) : 0;
+  const kmAutoEquiv = Math.round(totalCo2 / 0.24);
+
+  return (
+    <div className="space-y-6 text-slate-100 font-sans">
+      {/* Título de la sección */}
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Huella de Carbono e Impacto Ambiental</h1>
+        <p className="text-xs text-slate-400 mt-1">
+          Emisiones estimadas acumuladas basándose en el consumo actual y el factor DGEHM regional.
+        </p>
+      </div>
+
+      {/* Hero Card con la Hoja Verde Gigante */}
+      <div className="relative p-6 bg-[#22262B] border border-[#2D323A] rounded-2xl overflow-hidden flex items-center justify-between shadow-sm">
+        <div className="z-10">
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            Cálculo de Huella de Carbono
+          </span>
+          <div className="text-5xl font-extrabold text-[#34C759] font-mono mt-2">
+            {totalCo2} <span className="text-2xl text-slate-300 font-sans">kg CO₂</span>
           </div>
-
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[#1C2026] border border-[#2D323A] rounded-xl text-xs text-emerald-400">
-            <ShieldCheck className="w-4 h-4" />
-            <span>Factor DGEHM (0.385 kg CO₂/kWh)</span>
-          </div>
-        </div>
-
-        {/* TARJETA SUPERIOR: Cálculo con Hoja Grande */}
-        <div className="bg-[#1C2026] border border-[#2D323A] rounded-2xl p-6 sm:p-8 flex items-center justify-between relative overflow-hidden shadow-lg">
-          <div className="space-y-3 z-10 max-w-xl">
-            <h2 className="text-slate-300 font-semibold text-lg">
-              Cálculo de Huella de Carbono
-            </h2>
-            
-            <div className="text-4xl sm:text-5xl font-extrabold text-emerald-400 tracking-tight">
-              {co2EmittedKg} <span className="text-3xl sm:text-4xl font-bold text-emerald-500">kg CO₂</span>
-            </div>
-
-            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
-              Emisiones estimadas acumuladas basándose en el consumo actual y el factor DGEHM regional.
-            </p>
-          </div>
-
-          <div className="text-emerald-500/80 shrink-0 ml-4">
-            <Leaf className="w-24 h-24 sm:w-32 sm:h-32 stroke-[1.5]" />
-          </div>
-        </div>
-
-        {/* 4 TARJETAS KPI */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Consumo Total */}
-          <div className="bg-[#1C2026] p-5 rounded-2xl border border-[#2D323A] shadow-sm">
-            <div className="flex items-center justify-between text-slate-400 mb-3">
-              <span className="text-xs font-semibold uppercase tracking-wider">Consumo Total</span>
-              <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl">
-                <Zap className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-white">
-              {monthlyKwh} <span className="text-sm font-normal text-slate-400">kWh</span>
-            </div>
-            <p className="text-xs text-slate-400 mt-2">Acumulado estimado del mes</p>
-          </div>
-
-          {/* Emisiones CO2 */}
-          <div className="bg-[#1C2026] p-5 rounded-2xl border border-[#2D323A] shadow-sm">
-            <div className="flex items-center justify-between text-slate-400 mb-3">
-              <span className="text-xs font-semibold uppercase tracking-wider">Emisiones CO₂</span>
-              <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl">
-                <Leaf className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-emerald-400">
-              {co2EmittedKg} <span className="text-sm font-normal text-slate-400">kg</span>
-            </div>
-            <p className="text-xs text-emerald-500/80 mt-2 flex items-center gap-1 font-medium">
-              <TrendingDown className="w-3.5 h-3.5" /> Generados este mes
-            </p>
-          </div>
-
-          {/* Compensación */}
-          <div className="bg-[#1C2026] p-5 rounded-2xl border border-[#2D323A] shadow-sm">
-            <div className="flex items-center justify-between text-slate-400 mb-3">
-              <span className="text-xs font-semibold uppercase tracking-wider">Compensación</span>
-              <div className="p-2 bg-teal-500/10 text-teal-400 rounded-xl">
-                <TreePine className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-white">
-              {treesNeeded} <span className="text-sm font-normal text-slate-400">árboles</span>
-            </div>
-            <p className="text-xs text-slate-400 mt-2">Para absorber el CO₂ generado</p>
-          </div>
-
-          {/* Equivalencia Auto */}
-          <div className="bg-[#1C2026] p-5 rounded-2xl border border-[#2D323A] shadow-sm">
-            <div className="flex items-center justify-between text-slate-400 mb-3">
-              <span className="text-xs font-semibold uppercase tracking-wider">Equivalencia Auto</span>
-              <div className="p-2 bg-amber-500/10 text-amber-400 rounded-xl">
-                <Car className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-white">
-              {carKmEquivalent} <span className="text-sm font-normal text-slate-400">km</span>
-            </div>
-            <p className="text-xs text-slate-400 mt-2">Equivalente en km recorridos</p>
-          </div>
-        </div>
-
-        {/* SECCIÓN NUEVA: Gráfica de Emisiones Semanales vs Meta */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Gráfica de Barras Semanal */}
-          <div className="lg:col-span-2 bg-[#1C2026] p-6 rounded-2xl border border-[#2D323A]">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-base font-semibold text-white">Histórico Diario de CO₂ (kg/día)</h3>
-                <p className="text-xs text-slate-400">Generación de emisiones durante la semana actual</p>
-              </div>
-              <div className="flex items-center gap-3 text-xs">
-                <span className="flex items-center gap-1.5 text-slate-300">
-                  <span className="w-3 h-3 rounded bg-emerald-500"></span> Emisión Real
-                </span>
-                <span className="flex items-center gap-1.5 text-slate-400">
-                  <span className="w-3 h-0.5 bg-slate-500"></span> Meta (2.0 kg)
-                </span>
-              </div>
-            </div>
-
-            {/* Barras de la gráfica */}
-            <div className="h-44 flex items-end justify-between gap-3 pt-6 pb-2 border-b border-[#2D323A] relative">
-              {/* Línea de meta horizontal */}
-              <div className="absolute w-full border-t border-dashed border-slate-600 top-[35%] z-0"></div>
-
-              {weeklyData.map((item) => {
-                const heightPercent = Math.min(100, (item.co2 / (maxCo2 * 1.2)) * 100);
-                const isOverTarget = item.co2 > item.target;
-
-                return (
-                  <div key={item.day} className="flex-1 flex flex-col items-center gap-2 h-full justify-end z-10 group">
-                    <span className="text-[10px] text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono">
-                      {item.co2} kg
-                    </span>
-                    <div className="w-full max-w-[36px] bg-[#15181C] rounded-t-lg h-full flex items-end p-0.5">
-                      <div 
-                        className={`w-full rounded-t-md transition-all duration-500 ${
-                          isOverTarget ? 'bg-amber-500' : 'bg-emerald-500'
-                        }`}
-                        style={{ height: `${heightPercent}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-xs font-medium text-slate-400">{item.day}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Tarjeta de Eco-Tips y Meta Mensual */}
-          <div className="bg-[#1C2026] p-6 rounded-2xl border border-[#2D323A] flex flex-col justify-between space-y-4">
-            <div>
-              <div className="flex items-center gap-2 text-amber-400 font-semibold text-sm mb-3">
-                <Lightbulb className="w-4 h-4" />
-                <span>Acciones de Reducción Recomendadas</span>
-              </div>
-              
-              <ul className="space-y-3 text-xs text-slate-300">
-                <li className="p-2.5 bg-[#15181C] rounded-xl border border-[#2D323A] flex items-start gap-2.5">
-                  <Clock className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                  <span>Desconectar cargas vampiro nocturnas ahorraría <strong>~3.2 kg CO₂/mes</strong>.</span>
-                </li>
-                <li className="p-2.5 bg-[#15181C] rounded-xl border border-[#2D323A] flex items-start gap-2.5">
-                  <Target className="w-4 h-4 text-[#52C5E0] shrink-0 mt-0.5" />
-                  <span>Reducir la potencia pico en un 10% lograría la meta de impacto bajo en El Salvador.</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="pt-3 border-t border-[#2D323A]">
-              <div className="flex justify-between text-xs mb-1.5">
-                <span className="text-slate-400">Progreso de Meta Verde</span>
-                <span className="text-emerald-400 font-bold">78% Cumplido</span>
-              </div>
-              <div className="w-full bg-[#15181C] h-2 rounded-full overflow-hidden">
-                <div className="bg-emerald-500 h-full rounded-full" style={{ width: '78%' }}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* BARRA DE NIVEL DE IMPACTO ECOLÓGICO */}
-        <div className="bg-[#1C2026] p-6 rounded-2xl border border-[#2D323A]">
-          <h3 className="text-base font-semibold text-white mb-1">Nivel de Impacto Ecológico</h3>
-          <p className="text-xs text-slate-400 mb-4">
-            Estado del nodo según los límites de emisión sustentables.
+          <p className="text-xs text-slate-400 mt-2 max-w-md">
+            Emisiones estimadas acumuladas basándose en el consumo actual y el factor DGEHM regional.
           </p>
+        </div>
+        <Leaf className="w-36 h-36 text-[#34C759] opacity-80 absolute -right-4 -bottom-4 pointer-events-none" />
+      </div>
 
-          <div className="w-full bg-[#15181C] h-3.5 rounded-full overflow-hidden p-0.5 border border-[#2D323A] flex gap-1">
-            <div className="h-full bg-emerald-500 rounded-l-full" style={{ width: '45%' }}></div>
-            <div className="h-full bg-amber-500" style={{ width: '35%' }}></div>
-            <div className="h-full bg-red-500 rounded-r-full" style={{ width: '20%' }}></div>
+      {/* Tarjetas Principales con Iconos */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Consumo Total */}
+        <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-slate-400 uppercase">Consumo Total</span>
+            <div className="p-1.5 bg-[#1D333D] text-[#52C5E0] rounded-lg">
+              <Zap className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-3xl font-bold text-white font-mono mt-3">
+            {totalKwh.toFixed(2)} <span className="text-sm text-slate-400 font-sans">kWh</span>
+          </div>
+          <div className="mt-2 text-[11px] text-slate-400">Acumulado estimado del mes</div>
+        </div>
+
+        {/* Emisiones CO2 */}
+        <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-slate-400 uppercase">Emisiones CO₂</span>
+            <div className="p-1.5 bg-[#1E382B] text-[#34C759] rounded-lg">
+              <Leaf className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-3xl font-bold text-[#34C759] font-mono mt-3">
+            {totalCo2} <span className="text-sm text-slate-400 font-sans">kg</span>
+          </div>
+          <div className="mt-2 text-[11px] text-[#34C759]">Generados este mes</div>
+        </div>
+
+        {/* Compensación Árboles */}
+        <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-slate-400 uppercase">Compensación</span>
+            <div className="p-1.5 bg-[#1E382B] text-[#34C759] rounded-lg">
+              <Trees className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-3xl font-bold text-white font-mono mt-3">
+            {arbolesEquiv} <span className="text-sm text-slate-400 font-sans">árboles</span>
+          </div>
+          <div className="mt-2 text-[11px] text-slate-400">Para absorber el CO₂ generado</div>
+        </div>
+
+        {/* Equivalencia Auto */}
+        <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-slate-400 uppercase">Equivalencia Auto</span>
+            <div className="p-1.5 bg-[#3B2D1D] text-[#E5A93C] rounded-lg">
+              <Car className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-3xl font-bold text-white font-mono mt-3">
+            {kmAutoEquiv} <span className="text-sm text-slate-400 font-sans">km</span>
+          </div>
+          <div className="mt-2 text-[11px] text-slate-400">Equivalente en km recorridos</div>
+        </div>
+      </div>
+
+      {/* Gráfica Diaria de Barras & Acciones Recomendadas */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Histórico Diario (2 Columnas) */}
+        <div className="lg:col-span-2 p-6 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-semibold text-slate-100">Histórico Diario de CO₂ (kg/día)</h3>
+              <p className="text-xs text-slate-400">Generación de emisiones durante la semana actual</p>
+            </div>
+            <div className="flex items-center gap-4 text-xs">
+              <span className="flex items-center gap-1.5 text-slate-300">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#E5A93C]"></span> Emisión Real
+              </span>
+              <span className="text-slate-500">— Meta (2.0 kg)</span>
+            </div>
           </div>
 
-          <div className="flex justify-between text-xs mt-3 font-medium">
-            <span className="text-emerald-400">Eficiente (&lt; 150 kWh)</span>
-            <span className="text-amber-400">Moderado (150 - 300 kWh)</span>
-            <span className="text-red-400">Alto (&gt; 300 kWh)</span>
+          {/* Barras Visuales de la Semana */}
+          <div className="h-48 flex items-end justify-between gap-3 pt-6 px-4 border-b border-[#2D323A]">
+            {diasSemana.map((dia, idx) => {
+              const item = consumoDiario[idx];
+              const kwhDia = item ? parseFloat(item.kwh) : (potenciaKwActual > 0 ? (potenciaKwActual * 3) : 0);
+              const co2Dia = kwhDia * FACTOR_CO2;
+              const alturaPct = Math.min(Math.max((co2Dia / 3.0) * 100, 10), 90);
+
+              return (
+                <div key={dia} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+                  <div className="w-full max-w-[36px] bg-[#181B20] rounded-t-lg relative flex items-end h-full">
+                    <div 
+                      className={`w-full rounded-t-lg transition-all duration-500 ${
+                        co2Dia < 1.5 ? 'bg-[#34C759]' : 'bg-[#E5A93C]'
+                      }`}
+                      style={{ height: `${kwhDia > 0 ? alturaPct : 5}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-slate-400 font-mono">{dia}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Panel Lateral: Acciones Recomendadas y Meta Verde */}
+        <div className="p-6 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="w-4 h-4 text-[#E5A93C]" />
+              <h3 className="text-base font-semibold text-slate-100">Acciones de Reducción Recomendadas</h3>
+            </div>
+
+            <div className="space-y-3">
+              <div className="p-3 bg-[#181B20] border border-[#2D323A] rounded-xl text-xs space-y-1">
+                <p className="text-slate-300 font-medium">Desconectar cargas vampiro nocturnas</p>
+                <p className="text-slate-500 text-[11px]">Ahorraría ~3.2 kg CO₂/mes.</p>
+              </div>
+
+              <div className="p-3 bg-[#181B20] border border-[#2D323A] rounded-xl text-xs space-y-1">
+                <p className="text-slate-300 font-medium">Reducir la potencia pico en un 10%</p>
+                <p className="text-slate-500 text-[11px]">Lograría la meta de impacto bajo en El Salvador.</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex justify-between items-center text-xs mb-1.5">
+              <span className="text-slate-400 font-medium">Progreso de Meta Verde</span>
+              <span className="text-[#34C759] font-mono font-bold">
+                {potenciaKwActual > 0 ? '78% Cumplido' : '100% Sin Consumo'}
+              </span>
+            </div>
+            <div className="w-full bg-[#181B20] h-2 rounded-full overflow-hidden">
+              <div 
+                className="bg-[#34C759] h-full rounded-full transition-all duration-500" 
+                style={{ width: potenciaKwActual > 0 ? '78%' : '100%' }} 
+              />
+            </div>
           </div>
         </div>
       </div>
-    );
-  }
+
+      {/* Escala de Nivel de Impacto Ecológico */}
+      <div className="p-6 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-3">
+        <h3 className="text-base font-semibold text-slate-100">Nivel de Impacto Ecológico</h3>
+        <p className="text-xs text-slate-400">Estado del nodo según los límites de emisión sustentables.</p>
+
+        <div className="w-full h-3 bg-[#181B20] rounded-full flex overflow-hidden">
+          <div className="bg-[#34C759] h-full" style={{ width: '33%' }} />
+          <div className="bg-[#E5A93C] h-full" style={{ width: '33%' }} />
+          <div className="bg-[#E5484D] h-full" style={{ width: '34%' }} />
+        </div>
+
+        <div className="flex justify-between text-[11px] font-mono text-slate-400 pt-1">
+          <span className="text-[#34C759]">Eficiente (&lt; 150 kWh)</span>
+          <span className="text-[#E5A93C]">Moderado (150 - 300 kWh)</span>
+          <span className="text-[#E5484D]">Alto (&gt; 300 kWh)</span>
+        </div>
+      </div>
+    </div>
+  );
+}

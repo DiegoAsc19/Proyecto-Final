@@ -4,7 +4,7 @@ import KPICards from '../components/KPICards';
 import PowerChart from '../components/PowerChart';
 import CarbonView from '../components/CarbonView';
 
-export default function DashboardView({ telemetry }) {
+export default function DashboardView({ telemetry, logs = [] }) {
   return (
     <div className="space-y-8">
       <div>
@@ -19,8 +19,8 @@ export default function DashboardView({ telemetry }) {
       {/* Tarjetas KPI de Resumen */}
       <KPICards telemetry={telemetry} />
 
-      {/* Gráfico en Tiempo Real */}
-      <PowerChart />
+      {/* Gráfico en Tiempo Real alimentado con el historial de la API */}
+      <PowerChart data={logs} />
 
       {/* Indicadores de Huella de Carbono */}
       <CarbonView telemetry={telemetry} />

@@ -4,23 +4,21 @@ import { ShieldCheck, Settings } from 'lucide-react';
 
 export default function AlertBanner({ powerW, threshold, onOpenSettings }) {
   return (
-    <div className="flex items-center justify-between bg-[#151921] border border-[#262C36] rounded-2xl p-4 shadow-md w-full">
-      {/* Lado izquierdo: Alerta */}
+    <div className="flex items-center justify-between p-4 bg-[#1a1d24] border border-[#2a2e37] rounded-2xl shadow-sm">
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-          <ShieldCheck className="w-4 h-4" />
+        <div className="p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+          <ShieldCheck className="w-5 h-5 text-emerald-400" />
         </div>
-        <span className="text-xs font-semibold text-gray-200">
+        <p className="text-xs font-medium text-slate-200">
           Consumo dentro del rango nominal de operación.
-        </span>
+        </p>
       </div>
 
-      {/* Lado derecho: Botón Ajustes integrado en la misma tarjeta */}
       <button
         onClick={onOpenSettings}
-        className="flex items-center gap-2 bg-[#1C222D] hover:bg-[#252D3C] text-gray-300 hover:text-white text-xs font-semibold px-3.5 py-2 rounded-xl border border-[#262C36] transition-all"
+        className="flex items-center gap-2 px-3.5 py-1.5 bg-[#22262B] hover:bg-[#2A2F36] border border-[#2D323A] rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition-all shadow-sm"
       >
-        <Settings className="w-3.5 h-3.5 text-gray-400" />
+        <Settings className="w-4 h-4 text-[#52C5E0]" />
         <span>Ajustes</span>
       </button>
     </div>

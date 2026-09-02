@@ -1,9 +1,21 @@
-// src/pages/MonitoringView.jsx
+// src/components/MonitoringView.jsx (o src/pages/MonitoringView.jsx)
 import React from 'react';
 import { Activity, Zap, Radio, AlertTriangle } from 'lucide-react';
-import PowerChart from '../components/PowerChart'; // Gráfico de área temporal en vivo
+import PowerChart from '../components/PowerChart';
 
 export default function MonitoringView({ telemetry = {}, logs = [] }) {
+  // Mapeo de variables admitiendo ambos formatos (Español del backend e Inglés)
+  const voltaje = telemetry.voltaje ?? telemetry.voltage_v ?? telemetry.voltage ?? 0;
+  const corriente = telemetry.corriente ?? telemetry.current_a ?? telemetry.current ?? 0;
+  
+  // Convierte potencia_kw (kW) a Watts (W) si viene del backend
+  const potenciaWatts = telemetry.potencia_kw !== undefined 
+    ? (telemetry.potencia_kw * 1000).toFixed(1) 
+    : (telemetry.power_w ?? telemetry.power ?? 0);
+
+  const factorPotencia = telemetry.factor_potencia ?? telemetry.pf ?? 0.95;
+  const frecuencia = telemetry.frecuencia ?? telemetry.frequency ?? 60;
+
   return (
     <div className="space-y-6 text-slate-100 font-sans">
       {/* Encabezado */}
@@ -11,7 +23,7 @@ export default function MonitoringView({ telemetry = {}, logs = [] }) {
         <div>
           <h1 className="text-2xl font-bold text-slate-100 tracking-tight">Monitoreo en Tiempo Real</h1>
           <p className="text-xs text-slate-400 mt-1">
-            Telemetría eléctrica RMS e instantánea transmitida desde la ESP32-S3 via MQTT/WebSockets.
+            Telemetría eléctrica RMS e instantánea transmitida desde la ESP32-S3 via API REST.
           </p>
         </div>
         <div className="flex items-center gap-2 bg-[#181B20] border border-[#2D323A] px-3 py-1.5 rounded-xl">
@@ -29,7 +41,7 @@ export default function MonitoringView({ telemetry = {}, logs = [] }) {
         <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl">
           <span className="text-xs font-medium text-slate-400">Voltaje RMS</span>
           <div className="text-3xl font-bold text-white font-mono mt-1">
-            {telemetry.voltage || '119.9'} <span className="text-sm text-slate-400 font-sans">V</span>
+            {voltaje} <span className="text-sm text-slate-400 font-sans">V</span>
           </div>
           <div className="mt-2 text-[11px] text-slate-400">Rango normal (110V - 125V)</div>
         </div>
@@ -38,7 +50,7 @@ export default function MonitoringView({ telemetry = {}, logs = [] }) {
         <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl">
           <span className="text-xs font-medium text-slate-400">Corriente RMS</span>
           <div className="text-3xl font-bold text-white font-mono mt-1">
-            {telemetry.current || '7.91'} <span className="text-sm text-slate-400 font-sans">A</span>
+            {corriente} <span className="text-sm text-slate-400 font-sans">A</span>
           </div>
           <div className="mt-2 text-[11px] text-slate-400">Transformador de Corriente 100A</div>
         </div>
@@ -47,7 +59,7 @@ export default function MonitoringView({ telemetry = {}, logs = [] }) {
         <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl">
           <span className="text-xs font-medium text-slate-400">Potencia Activa</span>
           <div className="text-3xl font-bold text-white font-mono mt-1 text-[#E5A93C]">
-            {telemetry.power || '948.7'} <span className="text-sm text-slate-400 font-sans">W</span>
+            {potenciaWatts} <span className="text-sm text-slate-400 font-sans">W</span>
           </div>
           <div className="mt-2 text-[11px] text-slate-400">Calculado V_rms × I_rms × FP</div>
         </div>
@@ -56,14 +68,14 @@ export default function MonitoringView({ telemetry = {}, logs = [] }) {
         <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl">
           <span className="text-xs font-medium text-slate-400">Factor de Potencia / Freq</span>
           <div className="text-3xl font-bold text-white font-mono mt-1">
-            0.96 <span className="text-sm text-slate-400 font-sans">FP</span>
+            {factorPotencia} <span className="text-sm text-slate-400 font-sans">FP</span>
           </div>
-          <div className="mt-2 text-[11px] text-[#34C759] font-mono">60.00 Hz (Red Estable)</div>
+          <div className="mt-2 text-[11px] text-[#34C759] font-mono">{frecuencia}.00 Hz (Red Estable)</div>
         </div>
       </div>
 
-      {/* Gráfico en Tiempo Real de Potencia */}
-      <PowerChart />
+      {/* Gráfico en Tiempo Real de Potencia enviándole la telemetría e historial */}
+      <PowerChart logs={logs} telemetry={telemetry} />
 
       {/* Tabla de Logs de Telemetría en Vivo */}
       <div className="p-6 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-4">
@@ -88,34 +100,33 @@ export default function MonitoringView({ telemetry = {}, logs = [] }) {
             </thead>
             <tbody className="divide-y divide-[#2D323A]/50 font-mono">
               {logs.length > 0 ? (
-                logs.map((log, index) => (
-                  <tr key={index} className="hover:bg-[#181B20]/50 transition-colors">
-                    <td className="p-3 text-slate-400">{log.time}</td>
-                    <td className="p-3 text-amber-400 font-bold">{log.power_w} W</td>
-                    <td className="p-3 text-blue-400">{log.voltage_v} V</td>
-                    <td className="p-3 text-rose-400">{log.current_a} A</td>
-                    <td className="p-3">
-                      <span className="bg-[#1E382B] text-[#34C759] px-2 py-0.5 rounded text-[10px]">OK</span>
-                    </td>
-                  </tr>
-                ))
+                logs.map((log, index) => {
+                  const pW = log.power_w ?? log.power ?? (log.potencia_kw ? log.potencia_kw * 1000 : 0);
+                  const vV = log.voltage_v ?? log.voltaje ?? 0;
+                  const cA = log.current_a ?? log.corriente ?? 0;
+
+                  return (
+                    <tr key={index} className="hover:bg-[#181B20]/50 transition-colors">
+                      <td className="p-3 text-slate-400">{log.time}</td>
+                      <td className="p-3 text-amber-400 font-bold">{parseFloat(pW).toFixed(1)} W</td>
+                      <td className="p-3 text-blue-400">{vV} V</td>
+                      <td className="p-3 text-rose-400">{cA} A</td>
+                      <td className="p-3">
+                        <span className="bg-[#1E382B] text-[#34C759] px-2 py-0.5 rounded text-[10px]">OK</span>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
-                // Datos estáticos de ejemplo si no hay WebSocket conectado aún
-                [
-                  { t: '08:36:02', p: '948.7', v: '119.9', a: '7.91' },
-                  { t: '08:36:00', p: '946.2', v: '119.8', a: '7.90' },
-                  { t: '08:35:58', p: '951.0', v: '120.1', a: '7.92' },
-                ].map((item, idx) => (
-                  <tr key={idx} className="hover:bg-[#181B20]/50 transition-colors">
-                    <td className="p-3 text-slate-400">{item.t}</td>
-                    <td className="p-3 text-[#E5A93C] font-bold">{item.p} W</td>
-                    <td className="p-3 text-[#4A8CE8]">{item.v} V</td>
-                    <td className="p-3 text-[#52C5E0]">{item.a} A</td>
-                    <td className="p-3">
-                      <span className="bg-[#1E382B] text-[#34C759] px-2 py-0.5 rounded text-[10px]">NORMAL</span>
-                    </td>
-                  </tr>
-                ))
+                <tr className="hover:bg-[#181B20]/50 transition-colors">
+                  <td className="p-3 text-slate-400">En Vivo</td>
+                  <td className="p-3 text-[#E5A93C] font-bold">{potenciaWatts} W</td>
+                  <td className="p-3 text-[#4A8CE8]">{voltaje} V</td>
+                  <td className="p-3 text-[#52C5E0]">{corriente} A</td>
+                  <td className="p-3">
+                    <span className="bg-[#1E382B] text-[#34C759] px-2 py-0.5 rounded text-[10px]">ONLINE</span>
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>

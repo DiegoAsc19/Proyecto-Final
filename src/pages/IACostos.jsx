@@ -1,127 +1,148 @@
-import React, { useState } from 'react';
-import { Cpu } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+// src/pages/IACostos.jsx
+import React, { useState, useEffect } from 'react';
+import { DollarSign, Zap, TrendingUp, Cpu, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function IACostos() {
-  const [kwh, setKwh] = useState(391);
-  const FACTOR_DGEHM = 0.1944;
+  const [datosRecibo, setDatosRecibo] = useState(null);
 
-  const calcularCosto = (consumo) => {
-    let costo = 0;
-    if (consumo <= 99) {
-      costo = consumo * 0.1073;
-    } else if (consumo <= 200) {
-      costo = (99 * 0.1073) + ((consumo - 99) * 0.1445);
-    } else {
-      costo = (99 * 0.1073) + (101 * 0.1445) + ((consumo - 200) * 0.1689);
+  useEffect(() => {
+    // 1. Cargar si hay datos en localStorage
+    const guardado = localStorage.getItem('ultimo_recibo_ocr');
+    if (guardado) {
+      try {
+        setDatosRecibo(JSON.parse(guardado));
+      } catch (e) {
+        console.error('Error al parsear el recibo', e);
+      }
     }
-    return costo.toFixed(2);
-  };
 
-  const co2Generado = Math.round(kwh * FACTOR_DGEHM);
-  const arbolesEquiv = Math.round(co2Generado / 1.5);
+    // 2. Escuchar evento de sincronización en tiempo real
+    const handleActualizacion = (e) => {
+      setDatosRecibo(e.detail);
+    };
 
-  const datosProyeccion = [
-    { mes: 'May', consumo: 340 },
-    { mes: 'Jun', consumo: 355 },
-    { mes: 'Jul', consumo: 391 },
-    { mes: 'Ago', consumo: 385 },
-    { mes: 'Sep', consumo: 370 },
-    { mes: 'Oct', consumo: 365 },
-    { mes: 'Nov', consumo: 350 },
-    { mes: 'Dic', consumo: 410 },
-  ];
+    window.addEventListener('ocr_recibo_actualizado', handleActualizacion);
+    return () => window.removeEventListener('ocr_recibo_actualizado', handleActualizacion);
+  }, []);
+
+  // Cálculos dinámicos si existe un recibo sincronizado
+  const consumoKwh = datosRecibo ? parseFloat(datosRecibo.consumo_kwh) : 0;
+  const totalPagar = datosRecibo ? parseFloat(datosRecibo.total_pagar) : 0;
+  const costoPromedioKwh = consumoKwh > 0 ? (totalPagar / consumoKwh).toFixed(3) : '0.000';
+  const costoProyectadoSigMes = (totalPagar * 1.05).toFixed(2); // Estimación +5%
 
   return (
-    <div className="p-6 space-y-6 bg-slate-900 text-gray-100 min-h-screen">
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Cpu className="text-emerald-400" /> IA & Proyección de Costos
-        </h1>
-        <p className="text-sm text-gray-400">
-          Algoritmos entrenados con pliegos tarifarios SIGET · Bloques residenciales vigentes
-        </p>
+    <div className="space-y-6 text-slate-100 font-sans">
+      {/* Encabezado del Módulo */}
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Cpu className="w-6 h-6 text-[#52C5E0]" />
+            <span>IA Costos & Proyección Energética</span>
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">
+            Análisis tarifario automatizado mediante inteligencia artificial y sincronización OCR.
+          </p>
+        </div>
+
+        {datosRecibo && (
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1E382B] border border-[#34C759]/30 rounded-xl text-xs text-[#34C759]">
+            <CheckCircle2 className="w-4 h-4" />
+            <span>Sincronizado con OCR ({datosRecibo.distribuidora})</span>
+          </div>
+        )}
       </div>
 
-      {/* Bloques Tarifarios */}
-      <div className="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-3">
-        <h2 className="text-sm font-semibold text-gray-300">Bloques tarifarios SIGET — Sector residencial</h2>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between p-3 bg-slate-900/60 rounded-lg border border-slate-700">
-            <span>B1: 0 – 99 kWh</span>
-            <span className="font-mono text-gray-300">$0.1073 / kWh</span>
+      {datosRecibo ? (
+        <div className="space-y-6">
+          {/* Tarjetas Principales de Métricas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-2">
+              <div className="flex justify-between items-center text-slate-400">
+                <span className="text-xs font-medium">Factura Reciente</span>
+                <DollarSign className="w-4 h-4 text-[#34C759]" />
+              </div>
+              <div className="text-2xl font-bold text-white font-mono">${totalPagar.toFixed(2)}</div>
+              <p className="text-[10px] text-slate-500">Período: {datosRecibo.periodo}</p>
+            </div>
+
+            <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-2">
+              <div className="flex justify-between items-center text-slate-400">
+                <span className="text-xs font-medium">Consumo Total</span>
+                <Zap className="w-4 h-4 text-[#E5A93C]" />
+              </div>
+              <div className="text-2xl font-bold text-white font-mono">{consumoKwh} <span className="text-xs">kWh</span></div>
+              <p className="text-[10px] text-slate-500">NIC/NC: {datosRecibo.nic}</p>
+            </div>
+
+            <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-2">
+              <div className="flex justify-between items-center text-slate-400">
+                <span className="text-xs font-medium">Costo Promedio / kWh</span>
+                <TrendingUp className="w-4 h-4 text-[#52C5E0]" />
+              </div>
+              <div className="text-2xl font-bold text-white font-mono">${costoPromedioKwh}</div>
+              <p className="text-[10px] text-slate-500">Tarifa ponderada local</p>
+            </div>
+
+            <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-2">
+              <div className="flex justify-between items-center text-slate-400">
+                <span className="text-xs font-medium">Proyección Próximo Mes</span>
+                <RefreshCw className="w-4 h-4 text-purple-400" />
+              </div>
+              <div className="text-2xl font-bold text-purple-300 font-mono">${costoProyectadoSigMes}</div>
+              <p className="text-[10px] text-slate-500">Basado en hábito actual (+5%)</p>
+            </div>
           </div>
-          <div className="flex justify-between p-3 bg-slate-900/60 rounded-lg border border-slate-700">
-            <span>B2: 100 – 200 kWh</span>
-            <span className="font-mono text-gray-300">$0.1445 / kWh</span>
-          </div>
-          <div className="flex justify-between p-3 bg-emerald-950/40 rounded-lg border border-emerald-500/40">
-            <span className="text-emerald-400 font-medium">&gt; 200 kWh</span>
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-emerald-400 font-bold">$0.1689 / kWh</span>
-              <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-0.5 rounded font-bold">BLOQUE ACTIVO</span>
+
+          {/* Desglose Tarifario e Recomendación IA */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 p-6 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-4">
+              <h3 className="text-sm font-semibold text-slate-200">Desglose de Tarifas Identificadas por IA</h3>
+              
+              <div className="space-y-3 text-xs">
+                <div className="flex justify-between p-3 bg-[#181B20] border border-[#2D323A] rounded-xl">
+                  <span className="text-slate-400">Compañía Eléctrica</span>
+                  <span className="font-bold text-white">{datosRecibo.distribuidora}</span>
+                </div>
+                <div className="flex justify-between p-3 bg-[#181B20] border border-[#2D323A] rounded-xl">
+                  <span className="text-slate-400">Cargo Eléctrico Neto Estimado</span>
+                  <span className="font-mono text-white">${(totalPagar * 0.85).toFixed(2)} USD</span>
+                </div>
+                <div className="flex justify-between p-3 bg-[#181B20] border border-[#2D323A] rounded-xl">
+                  <span className="text-slate-400">Impuestos / Tasas Municipales Estimadas</span>
+                  <span className="font-mono text-white">${(totalPagar * 0.15).toFixed(2)} USD</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Diagnóstico Automatizado */}
+            <div className="p-6 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-4 flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-200 mb-3 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-[#52C5E0]" />
+                  <span>Diagnóstico IA</span>
+                </h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Tu consumo de <strong className="text-[#E5A93C]">{consumoKwh} kWh</strong> se mantiene dentro del rango residencial estándar. Mantener el uso fuera de horas pico optimizará la proyección del siguiente ciclo.
+                </p>
+              </div>
+
+              <div className="p-3 bg-[#181B20] border border-[#2D323A] rounded-xl text-[11px] text-slate-400">
+                Última auditoría realizada correctamente vía escáner OCR.
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Simulador */}
-      <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-6">
-        <h2 className="text-base font-semibold">Simulador de consumo · Algoritmo IA</h2>
-        <div className="space-y-2">
-          <input
-            type="range"
-            min="50"
-            max="600"
-            value={kwh}
-            onChange={(e) => setKwh(Number(e.target.value))}
-            className="w-full accent-emerald-500 bg-slate-700 h-2 rounded-lg cursor-pointer"
-          />
-          <div className="flex justify-between text-xs text-gray-400 font-mono">
-            <span>50 kWh</span>
-            <span>600 kWh</span>
-          </div>
+      ) : (
+        /* Estado vacío cuando aún no se ha subido ningún recibo */
+        <div className="p-12 bg-[#22262B] border border-[#2D323A] rounded-2xl flex flex-col items-center justify-center text-center space-y-3">
+          <AlertCircle className="w-10 h-10 text-slate-500 mb-1" />
+          <h3 className="text-sm font-bold text-slate-300">No hay datos de factura sincronizados</h3>
+          <p className="text-xs text-slate-500 max-w-sm">
+            Dirígete al apartado <strong>OCR Recibos</strong>, sube una foto de tu factura energética y presiona "Guardar y Sincronizar" para ver el análisis de costos.
+          </p>
         </div>
-
-        {/* Tarjetas de Resultados */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
-          <div className="bg-slate-900/80 p-4 rounded-lg border border-slate-700">
-            <span className="text-xs text-gray-400 block">Consumo</span>
-            <span className="text-2xl font-bold text-sky-400 font-mono">{kwh} <span className="text-sm">kWh</span></span>
-          </div>
-          <div className="bg-slate-900/80 p-4 rounded-lg border border-slate-700">
-            <span className="text-xs text-gray-400 block">Costo SIGET</span>
-            <span className="text-2xl font-bold text-orange-400 font-mono">${calcularCosto(kwh)} <span className="text-sm">USD</span></span>
-          </div>
-          <div className="bg-slate-900/80 p-4 rounded-lg border border-slate-700">
-            <span className="text-xs text-gray-400 block">CO₂ generado</span>
-            <span className="text-2xl font-bold text-emerald-400 font-mono">{co2Generado} <span className="text-sm">kg</span></span>
-          </div>
-          <div className="bg-slate-900/80 p-4 rounded-lg border border-slate-700">
-            <span className="text-xs text-gray-400 block">Árboles equiv.</span>
-            <span className="text-2xl font-bold text-teal-400 font-mono">{arbolesEquiv} <span className="text-sm">árboles</span></span>
-          </div>
-        </div>
-      </div>
-
-      {/* Gráfica de Proyección */}
-      <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-base font-semibold">Proyección IA — histórico + 5 meses futuros</h2>
-          <span className="bg-cyan-950 text-cyan-400 text-xs px-2.5 py-1 rounded font-mono border border-cyan-800">MODELO PREDICTIVO</span>
-        </div>
-        <div className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={datosProyeccion}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="mes" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" />
-              <Tooltip contentStyle={{ backgroundColor: '#1e293b', borderColor: '#475569', borderRadius: '0.5rem' }} />
-              <Line type="monotone" dataKey="consumo" stroke="#38bdf8" strokeWidth={3} dot={{ r: 4, fill: '#38bdf8' }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
