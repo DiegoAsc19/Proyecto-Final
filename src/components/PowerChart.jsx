@@ -15,11 +15,11 @@ export default function PowerChart({ data, logs = [], telemetry = {} }) {
   const chartData = rawData.map((item) => {
     let powerInWatts = 0;
 
-    if (item.power_w !== undefined) {
+    if (item.power_w !== undefined && item.power_w !== null) {
       powerInWatts = item.power_w;
-    } else if (item.potencia_kw !== undefined) {
+    } else if (item.potencia_kw !== undefined && item.potencia_kw !== null) {
       powerInWatts = item.potencia_kw * 1000;
-    } else if (item.power !== undefined) {
+    } else if (item.power !== undefined && item.power !== null) {
       powerInWatts = item.power;
     }
 
@@ -56,13 +56,23 @@ export default function PowerChart({ data, logs = [], telemetry = {} }) {
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="colorPower" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#4A8CE8" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#4A8CE8" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="#E5A93C" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#E5A93C" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#2D323A" vertical={false} />
               <XAxis dataKey="time" stroke="#64748B" fontSize={11} tickLine={false} />
-              <YAxis stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
+              
+              {/* Eje Y dinámico con escala mínima adaptada a motores industriales (2500W mínimo) */}
+              <YAxis 
+                stroke="#64748B" 
+                fontSize={11} 
+                tickLine={false} 
+                axisLine={false}
+                domain={[0, (dataMax) => Math.max(Math.ceil(dataMax * 1.15), 2500)]}
+                unit=" W"
+              />
+              
               <Tooltip
                 contentStyle={{
                   backgroundColor: '#181B20',
@@ -71,15 +81,17 @@ export default function PowerChart({ data, logs = [], telemetry = {} }) {
                   color: '#F8FAFC',
                   fontSize: '12px'
                 }}
-                formatter={(value) => [`${value} W`, 'Potencia']}
+                formatter={(value) => [`${value} W`, 'Potencia Activa']}
               />
+              
               <Area
                 type="monotone"
                 dataKey="power"
-                stroke="#4A8CE8"
-                strokeWidth={2}
+                stroke="#E5A93C"
+                strokeWidth={2.5}
                 fillOpacity={1}
                 fill="url(#colorPower)"
+                isAnimationActive={false}
               />
             </AreaChart>
           </ResponsiveContainer>

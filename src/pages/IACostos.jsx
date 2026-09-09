@@ -25,11 +25,37 @@ export default function IACostos() {
     return () => window.removeEventListener('ocr_recibo_actualizado', handleActualizacion);
   }, []);
 
-  // Cálculos dinámicos si existe un recibo sincronizado
-  const consumoKwh = datosRecibo ? parseFloat(datosRecibo.consumo_kwh) : 0;
-  const totalPagar = datosRecibo ? parseFloat(datosRecibo.total_pagar) : 0;
+  // Función de limpieza defensiva para Strings provenientes del OCR (elimina '$', comas y espacios)
+  const parsearNumeroLimpio = (val) => {
+    if (!val) return 0;
+    if (typeof val === 'number') return val;
+    const strLimpio = val.toString().replace(/[^0-9.-]/g, '');
+    const num = parseFloat(strLimpio);
+    return isNaN(num) ? 0 : num;
+  };
+
+  // Extraer valores limpios
+  const consumoKwh = datosRecibo ? parsearNumeroLimpio(datosRecibo.consumo_kwh) : 0;
+  const totalPagar = datosRecibo ? parsearNumeroLimpio(datosRecibo.total_pagar) : 0;
+
+  // 1. Cálculo de Costo Promedio / kWh
   const costoPromedioKwh = consumoKwh > 0 ? (totalPagar / consumoKwh).toFixed(3) : '0.000';
-  const costoProyectadoSigMes = (totalPagar * 1.05).toFixed(2); // Estimación +5%
+
+  // 2. Identificación del Bloque Tarifario DGEHM (El Salvador)
+  let bloqueTarifario = 'Bajo (0 - 99 kWh)';
+  if (consumoKwh > 300) {
+    bloqueTarifario = 'Alto (> 300 kWh)';
+  } else if (consumoKwh >= 100) {
+    bloqueTarifario = 'Medio (100 - 300 kWh)';
+  }
+
+  // 3. Proyección Próximo Mes (Estructura de consumo real + estimación de variación del 5%)
+  const costoProyectadoSigMes = (totalPagar * 1.05).toFixed(2);
+
+  // 4. Desglose Estimado de Factura (Energía + IVA 13% + Comercialización/Alumbrado)
+  const estimadoNetoEnergia = totalPagar > 0 ? (totalPagar / 1.13) * 0.85 : 0;
+  const estimadoIva = totalPagar > 0 ? totalPagar - (totalPagar / 1.13) : 0;
+  const estimadoTasasOtros = totalPagar > 0 ? totalPagar - estimadoNetoEnergia - estimadoIva : 0;
 
   return (
     <div className="space-y-6 text-slate-100 font-sans">
@@ -48,7 +74,7 @@ export default function IACostos() {
         {datosRecibo && (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1E382B] border border-[#34C759]/30 rounded-xl text-xs text-[#34C759]">
             <CheckCircle2 className="w-4 h-4" />
-            <span>Sincronizado con OCR ({datosRecibo.distribuidora})</span>
+            <span>Sincronizado con OCR ({datosRecibo.distribuidora || 'Distribuidora Local'})</span>
           </div>
         )}
       </div>
@@ -63,7 +89,7 @@ export default function IACostos() {
                 <DollarSign className="w-4 h-4 text-[#34C759]" />
               </div>
               <div className="text-2xl font-bold text-white font-mono">${totalPagar.toFixed(2)}</div>
-              <p className="text-[10px] text-slate-500">Período: {datosRecibo.periodo}</p>
+              <p className="text-[10px] text-slate-500">Período: {datosRecibo.periodo || 'N/A'}</p>
             </div>
 
             <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-2">
@@ -71,8 +97,10 @@ export default function IACostos() {
                 <span className="text-xs font-medium">Consumo Total</span>
                 <Zap className="w-4 h-4 text-[#E5A93C]" />
               </div>
-              <div className="text-2xl font-bold text-white font-mono">{consumoKwh} <span className="text-xs">kWh</span></div>
-              <p className="text-[10px] text-slate-500">NIC/NC: {datosRecibo.nic}</p>
+              <div className="text-2xl font-bold text-white font-mono">
+                {consumoKwh} <span className="text-xs font-sans text-slate-400">kWh</span>
+              </div>
+              <p className="text-[10px] text-slate-500">NIC/NC: {datosRecibo.nic || 'Sin registrar'}</p>
             </div>
 
             <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-2">
@@ -81,7 +109,7 @@ export default function IACostos() {
                 <TrendingUp className="w-4 h-4 text-[#52C5E0]" />
               </div>
               <div className="text-2xl font-bold text-white font-mono">${costoPromedioKwh}</div>
-              <p className="text-[10px] text-slate-500">Tarifa ponderada local</p>
+              <p className="text-[10px] text-slate-500">Tarifa ponderada residencial</p>
             </div>
 
             <div className="p-5 bg-[#22262B] border border-[#2D323A] rounded-2xl space-y-2">
@@ -90,7 +118,7 @@ export default function IACostos() {
                 <RefreshCw className="w-4 h-4 text-purple-400" />
               </div>
               <div className="text-2xl font-bold text-purple-300 font-mono">${costoProyectadoSigMes}</div>
-              <p className="text-[10px] text-slate-500">Basado en hábito actual (+5%)</p>
+              <p className="text-[10px] text-slate-500">Tendencia mensual (+5%)</p>
             </div>
           </div>
 
@@ -101,16 +129,24 @@ export default function IACostos() {
               
               <div className="space-y-3 text-xs">
                 <div className="flex justify-between p-3 bg-[#181B20] border border-[#2D323A] rounded-xl">
-                  <span className="text-slate-400">Compañía Eléctrica</span>
-                  <span className="font-bold text-white">{datosRecibo.distribuidora}</span>
+                  <span className="text-slate-400">Distribuidora Eléctrica</span>
+                  <span className="font-bold text-white">{datosRecibo.distribuidora || 'No detectada'}</span>
                 </div>
                 <div className="flex justify-between p-3 bg-[#181B20] border border-[#2D323A] rounded-xl">
-                  <span className="text-slate-400">Cargo Eléctrico Neto Estimado</span>
-                  <span className="font-mono text-white">${(totalPagar * 0.85).toFixed(2)} USD</span>
+                  <span className="text-slate-400">Bloque de Consumo DGEHM</span>
+                  <span className="font-mono text-[#52C5E0]">{bloqueTarifario}</span>
                 </div>
                 <div className="flex justify-between p-3 bg-[#181B20] border border-[#2D323A] rounded-xl">
-                  <span className="text-slate-400">Impuestos / Tasas Municipales Estimadas</span>
-                  <span className="font-mono text-white">${(totalPagar * 0.15).toFixed(2)} USD</span>
+                  <span className="text-slate-400">Cargo Net de Energía Estimado</span>
+                  <span className="font-mono text-white">${estimadoNetoEnergia.toFixed(2)} USD</span>
+                </div>
+                <div className="flex justify-between p-3 bg-[#181B20] border border-[#2D323A] rounded-xl">
+                  <span className="text-slate-400">IVA Aplicado (13%)</span>
+                  <span className="font-mono text-white">${estimadoIva.toFixed(2)} USD</span>
+                </div>
+                <div className="flex justify-between p-3 bg-[#181B20] border border-[#2D323A] rounded-xl">
+                  <span className="text-slate-400">Comercialización y Tasas Municipales Estimadas</span>
+                  <span className="font-mono text-white">${estimadoTasasOtros.toFixed(2)} USD</span>
                 </div>
               </div>
             </div>
@@ -123,7 +159,10 @@ export default function IACostos() {
                   <span>Diagnóstico IA</span>
                 </h3>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Tu consumo de <strong className="text-[#E5A93C]">{consumoKwh} kWh</strong> se mantiene dentro del rango residencial estándar. Mantener el uso fuera de horas pico optimizará la proyección del siguiente ciclo.
+                  Tu consumo de <strong className="text-[#E5A93C]">{consumoKwh} kWh</strong> pertenece al bloque <strong className="text-[#52C5E0]">{bloqueTarifario}</strong>. 
+                  {consumoKwh > 300 
+                    ? ' Te encuentras en el bloque superior sin subsidio. Controlar el uso de cargas resistivas reducirá drásticamente la factura.' 
+                    : ' Mantenerte por debajo de los 300 kWh te asegura evitar el tramo con tarifas de mayor penalización.'}
                 </p>
               </div>
 

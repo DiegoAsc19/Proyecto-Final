@@ -1,4 +1,3 @@
-// src/components/Sidebar.jsx
 import React from 'react';
 import { 
   LayoutDashboard, 
@@ -6,16 +5,18 @@ import {
   Receipt, 
   Bot, 
   Lightbulb,
-  Footprints
+  Footprints,
+  PieChart // <--- Importado aquí
 } from 'lucide-react';
 
 export default function Sidebar({ activeTab, setActiveTab }) {
   const navItems = [
     { id: 'dashboard', name: 'Dashboard Principal', icon: LayoutDashboard },
     { id: 'monitoring', name: 'Monitoreo', icon: Activity },
+    { id: 'desglose', name: 'Desglose NILM', icon: PieChart },
     { id: 'carbon', name: 'Huella de Carbono', icon: Footprints },
     { id: 'ocr', name: 'OCR Recibos', icon: Receipt },
-    { id: 'costos', name: 'IA Costos', icon: Bot },
+    { id: 'ia-costos', name: 'IA Costos', icon: Bot },
     { id: 'recomendaciones', name: 'Recomendaciones', icon: Lightbulb },
   ];
 
@@ -73,4 +74,4 @@ export default function Sidebar({ activeTab, setActiveTab }) {
       </div>
     </aside>
   );
-}
+} 
