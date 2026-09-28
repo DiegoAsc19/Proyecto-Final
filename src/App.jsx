@@ -9,6 +9,7 @@ import SettingsModal from './components/SettingsModal';
 import IACostos from './pages/IACostos';
 import Recomendaciones from './pages/Recomendaciones';
 import OCRRecibos from './pages/OCRRecibos';
+import WeatherWidget from './components/WeatherWidget';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -167,6 +168,11 @@ export default function App() {
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <main className="flex-1 p-8 overflow-y-auto relative">
+        {/* Widget del Clima */}
+        <div className="mb-6">
+          <WeatherWidget />
+        </div>
+
         {(activeTab === 'dashboard' || activeTab === 'monitoring' || activeTab === 'monitoreo') && (
           <div className="mb-6">
             <AlertBanner 
