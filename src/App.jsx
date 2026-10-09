@@ -35,7 +35,7 @@ export default function App() {
   const [threshold, setThreshold] = useState(950);
   
   // Coloca la IP asignada a tu ESP32 por la red Wi-Fi
-  const [ipAddress, setIpAddress] = useState('10.188.100.236');
+  const [ipAddress, setIpAddress] = useState('10.84.42.236');
 
   const [telemetry, setTelemetry] = useState(estadoCeroHardware);
   const [logs, setLogs] = useState([]);
