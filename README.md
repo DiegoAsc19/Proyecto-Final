@@ -38,3 +38,10 @@ Para la creación y maquetación de la aplicación web se instalaron y utilizaro
    ```
 
 3. Abrir en el navegador la dirección generada en la consola (por defecto `http://localhost:5173`).
+
+# VoltAudit IoT
+
+* **Equipo responsable:** Equipo 1 (Diego)[cite: 12]
+* **Puerto de la interfaz web:** `http://localhost:5173/`[cite: 12]
+* **Credenciales de prueba:** Sistema de acceso libre / No requiere login de usuario.
+* **Descripción:** Plataforma IoT de auditoría energética en tiempo real que monitorea variables eléctricas (voltaje RMS, corriente, potencia activa) desde un nodo ESP32-S3, integrada con geolocalización meteorológica y cálculo de huella de carbono[cite: 12].

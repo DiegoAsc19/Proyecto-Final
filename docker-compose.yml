@@ -1,0 +1,8 @@
+services:
+  voltaudit-web:
+    build: .
+    ports:
+      - "8101:80"
+    environment:
+      - VITE_OPENWEATHER_API_KEY=${VITE_OPENWEATHER_API_KEY:-69742974a1bb38df12aec9fea18de8c8}
+    restart: always
